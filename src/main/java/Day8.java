@@ -18,7 +18,7 @@ public class Day8 {
     }
 
     public static void partTwo() {
-        System.out.println("Day Eight, Part One:");
+        System.out.println("Day Eight, Part Two:");
         initialiseInput();
         List<Node> nodes = generateNodes();
         System.out.println(calculateNodeValue(nodes.get(0), 0));
