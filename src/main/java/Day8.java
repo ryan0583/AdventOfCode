@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Day8 {
-//    private static List<Integer> input = Arrays.asList(2,3,0,3,10,11,12,1,1,0,1,99,2,1,1,2);
+    //    private static List<Integer> input = Arrays.asList(2,3,0,3,10,11,12,1,1,0,1,99,2,1,1,2);
     private static List<Integer> input;
 
 
@@ -17,7 +17,14 @@ public class Day8 {
         System.out.println(sumMetaData(nodes));
     }
 
-    private static void initialiseInput(){
+    public static void partTwo() {
+        System.out.println("Day Eight, Part One:");
+        initialiseInput();
+        List<Node> nodes = generateNodes();
+        System.out.println(calculateNodeValue(nodes.get(0), 0));
+    }
+
+    private static void initialiseInput() {
         input = new ArrayList<>();
         try {
             BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Ryan.Griffiths\\Documents\\AOC\\src\\main\\resources\\Day8Input.txt"));
@@ -31,8 +38,7 @@ public class Day8 {
             }
 
             br.close();
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             System.out.println(t.getMessage());
         }
     }
@@ -41,6 +47,23 @@ public class Day8 {
         List<Node> nodes = new ArrayList<>();
         generateAndAddNode(nodes, 0, null);
         return nodes;
+    }
+
+    private static int calculateNodeValue(Node node, int runningTotal) {
+        if (node.getNumChildren() > 0) {
+            for (int metaData : node.getMetaDataEntries()) {
+                if (metaData <= node.getNumChildren()) {
+                    Node child = node.getChildren().get(metaData - 1);
+                    runningTotal = calculateNodeValue(child, runningTotal);
+                }
+            }
+        } else {
+            for (int metaData : node.getMetaDataEntries()) {
+                runningTotal += metaData;
+            }
+        }
+
+        return runningTotal;
     }
 
     private static int generateAndAddNode(List<Node> nodes, int index, Node parent) {
@@ -59,7 +82,7 @@ public class Day8 {
             index = generateAndAddNode(nodes, index, node);
         }
 
-        for (int i=0; i < numMetaData; i++) {
+        for (int i = 0; i < numMetaData; i++) {
             int metaData = input.get(index);
             node.getMetaDataEntries().add(metaData);
             index++;
