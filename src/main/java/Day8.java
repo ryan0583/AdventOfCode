@@ -27,7 +27,7 @@ public class Day8 {
     private static void initialiseInput() {
         input = new ArrayList<>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Ryan.Griffiths\\Documents\\AOC\\src\\main\\resources\\Day8Input.txt"));
+            BufferedReader br = new BufferedReader(new FileReader("src/main/resources/Day8Input.txt"));
             String line;
             while ((line = br.readLine()) != null) {
 
