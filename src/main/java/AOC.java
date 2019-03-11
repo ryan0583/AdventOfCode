@@ -18,8 +18,9 @@ public class AOC {
 //        Day7.partTwo();
 //        Day8.partOne();
 //        Day8.partTwo();
-        Day9.partOne();
-        Day9.partTwo();
+//        Day9.partOne();
+//        Day9.partTwo();
+        Day10.partOne();
         System.out.println(LocalDateTime.now());
     }
 }
