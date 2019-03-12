@@ -1,3 +1,4 @@
+import Objects.GridToPrint;
 import Objects.Star;
 
 import java.util.ArrayList;
@@ -364,14 +365,17 @@ public class Day10 {
         List<Star> stars = generateStars();
 
         int seconds = 0;
+        GridToPrint currentGrid = null;
         while (seconds < 12000) {
-            printStars(stars, seconds);
+            currentGrid = generateGrid(stars, seconds, currentGrid);
             moveStars(stars);
             seconds++;
         }
+
+        currentGrid.printGrid();
     }
 
-    private static void printStars(List<Star> stars, int seconds) {
+    private static GridToPrint generateGrid(List<Star> stars, int seconds, GridToPrint currentGrid) {
         int minX = Integer.MAX_VALUE;
         int maxX = 0;
         int minY = Integer.MAX_VALUE;
@@ -397,7 +401,8 @@ public class Day10 {
             }
         }
 
-        if (maxY - minY < 11) {
+        if (maxY - minY < 500 //avoid OOM
+                && (currentGrid == null || maxY - minY < currentGrid.getyDist())) {
             String[][] grid = new String[maxY - minY + 1][maxX - minX + 1];
             for (String[] row : grid) {
                 Arrays.fill(row, ".");
@@ -407,12 +412,10 @@ public class Day10 {
                 grid[star.getyPosition() - minY][star.getxPosition() - minX] = "#";
             }
 
-            System.out.println(Arrays.deepToString(grid).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
-//            System.out.println(minX + ", " + maxX);
-//            System.out.println(minY + ", " + maxY);
-            System.out.println("Day Ten, Part Two:");
-            System.out.println(seconds);
+            currentGrid = new GridToPrint(maxY - minY, seconds, grid);
         }
+
+        return currentGrid;
     }
 
     private static void moveStars(List<Star> stars) {

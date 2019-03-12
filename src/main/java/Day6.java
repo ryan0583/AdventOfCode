@@ -1,3 +1,8 @@
+import Objects.GridFrame;
+import Objects.GridToPrint;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,7 +83,8 @@ public class Day6 {
             }
         }
 
-        //System.out.println(Arrays.deepToString(arr).replace("], ", "]\n"));
+        GridFrame print = new GridFrame(arr);
+        print.setVisible(true);
         HashSet<Integer> edgeCoordIds = findEdgeCoordIds(arr);
 
         HashMap<Integer, Integer> coordIdToAreaSize = new HashMap<>();
