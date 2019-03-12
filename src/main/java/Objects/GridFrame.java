@@ -52,9 +52,9 @@ public class GridFrame extends JFrame {
         private boolean containsSimilarColor(Collection<Color> colors, Color color) {
             boolean similarColorFound = false;
             for (Color colorCheck : colors) {
-                if (Math.abs(colorCheck.getRed() - color.getRed()) < 20
-                        && Math.abs(colorCheck.getGreen() - color.getGreen()) < 20
-                        && Math.abs(colorCheck.getBlue() - color.getBlue()) < 20) {
+                if (Math.abs(colorCheck.getRed() - color.getRed()) < 10
+                        && Math.abs(colorCheck.getGreen() - color.getGreen()) < 10
+                        && Math.abs(colorCheck.getBlue() - color.getBlue()) < 10) {
                     similarColorFound = true;
                     break;
                 }
