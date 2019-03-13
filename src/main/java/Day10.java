@@ -366,7 +366,7 @@ public class Day10 {
         List<Star> stars = generateStars();
 
         int seconds = 0;
-        GridToPrint currentGrid = new GridToPrint();
+        GridToPrint currentGrid = null;
         boolean contracting = true;
         while (contracting) {
             GridToPrint newGrid = generateGrid(stars, seconds, currentGrid);
@@ -386,7 +386,8 @@ public class Day10 {
         int[] minAndMaxXAndY = findMinAndMaxXAndY(stars);
 
         GridToPrint returnGrid = null;
-        if (minAndMaxXAndY[3] - minAndMaxXAndY[2] < currentGrid.getyDist()) {
+        if (currentGrid == null
+                || (minAndMaxXAndY[3] - minAndMaxXAndY[2] < currentGrid.getyDist())) {
             returnGrid = new GridToPrint(seconds, stars, minAndMaxXAndY[0], minAndMaxXAndY[1], minAndMaxXAndY[2], minAndMaxXAndY[3]);
         }
 

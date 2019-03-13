@@ -1,20 +1,16 @@
 package Objects;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class GridToPrint {
     private int numSeconds;
-    private List<Star> stars = new ArrayList<>();
-    private int minX = Integer.MIN_VALUE / 2;
-    private int maxX = Integer.MAX_VALUE / 2;
-    private int minY = Integer.MIN_VALUE / 2;
-    private int maxY = Integer.MAX_VALUE / 2;
-
-    public GridToPrint() {
-    }
+    private List<Star> stars;
+    private int minX;
+    private int maxX;
+    private int minY;
+    private int maxY;
 
     public GridToPrint(int numSeconds, List<Star> stars, int minX, int maxX, int minY, int maxY) {
         this.numSeconds = numSeconds;
