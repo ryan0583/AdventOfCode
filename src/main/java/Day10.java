@@ -1,3 +1,4 @@
+import Objects.GridFrame;
 import Objects.GridToPrint;
 import Objects.Star;
 
@@ -6,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Day10 {
-    
+
     private static List<String> input = Arrays.asList("position=<31351,-51811>velocity=<-3,5>",
             "position=<21001,31317>velocity=<-2,-3>",
             "position=<-41347,-41423>velocity=<4,4>",
@@ -366,8 +367,14 @@ public class Day10 {
 
         int seconds = 0;
         GridToPrint currentGrid = null;
-        while (seconds < 12000) {
-            currentGrid = generateGrid(stars, seconds, currentGrid);
+        boolean contracting = true;
+        while (contracting) {
+            GridToPrint newGrid = generateGrid(stars, seconds, currentGrid);
+            if (newGrid != null) {
+                currentGrid = newGrid;
+            } else {
+                contracting = false;
+            }
             moveStars(stars);
             seconds++;
         }
@@ -376,6 +383,18 @@ public class Day10 {
     }
 
     private static GridToPrint generateGrid(List<Star> stars, int seconds, GridToPrint currentGrid) {
+        int[] minAndMaxXAndY = findMinAndMaxXAndY(stars);
+
+        GridToPrint returnGrid = null;
+        if (currentGrid == null
+                || (minAndMaxXAndY[3] - minAndMaxXAndY[2] < currentGrid.getyDist())) {
+            returnGrid = new GridToPrint(seconds, stars, minAndMaxXAndY[0], minAndMaxXAndY[1], minAndMaxXAndY[2], minAndMaxXAndY[3]);
+        }
+
+        return returnGrid;
+    }
+
+    private static int[] findMinAndMaxXAndY(List<Star> stars) {
         int minX = Integer.MAX_VALUE;
         int maxX = 0;
         int minY = Integer.MAX_VALUE;
@@ -401,21 +420,7 @@ public class Day10 {
             }
         }
 
-        if (maxY - minY < 500 //avoid OOM
-                && (currentGrid == null || maxY - minY < currentGrid.getyDist())) {
-            String[][] grid = new String[maxY - minY + 1][maxX - minX + 1];
-            for (String[] row : grid) {
-                Arrays.fill(row, ".");
-            }
-
-            for (Star star : stars) {
-                grid[star.getyPosition() - minY][star.getxPosition() - minX] = "#";
-            }
-
-            currentGrid = new GridToPrint(maxY - minY, seconds, grid);
-        }
-
-        return currentGrid;
+        return new int[]{minX, maxX, minY, maxY};
     }
 
     private static void moveStars(List<Star> stars) {
@@ -427,8 +432,6 @@ public class Day10 {
         for (String str : input) {
             String position = str.substring(str.indexOf("position=<") + "position=<".length(), str.indexOf(">velocity=<"));
             String velocity = str.substring(str.indexOf(">velocity=<") + ">velocity=<".length()).replace(">", "");
-//            System.out.println(position);
-//            System.out.println(velocity);
             int xPosition = Integer.parseInt(position.substring(0, position.indexOf(",")));
             int yPosition = Integer.parseInt(position.substring(position.indexOf(",") + 1));
             int xVelocity = Integer.parseInt(velocity.substring(0, velocity.indexOf(",")));
