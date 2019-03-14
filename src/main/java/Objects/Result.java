@@ -14,6 +14,7 @@ public class Result {
     }
 
     public void print() {
+        System.out.println();
         System.out.println(x + "," + y + "," + squareSize);
     }
 

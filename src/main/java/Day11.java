@@ -12,9 +12,7 @@ public class Day11 {
 
         int[][] grid = generateGrid(gridSerialNumber);
 
-        Result result = getMaxResult(grid, 3);
-
-        System.out.println(result.getX() + "," + result.getY());
+        getMaxResult(grid, 3).print();
     }
 
     public static void partTwo() {
