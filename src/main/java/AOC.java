@@ -12,7 +12,7 @@ public class AOC {
 //        Day4.partOne();
 //        Day5.partOne();
 //        Day5.partTwo();
-        Day6.partOne();
+//        Day6.partOne();
 //        Day6.partTwo();
 //        Day7.partOne();
 //        Day7.partTwo();
@@ -21,6 +21,8 @@ public class AOC {
 //        Day9.partOne();
 //        Day9.partTwo();
 //        Day10.partOne();
+        Day11.partOne();
+        Day11.partTwo();
         System.out.println(LocalDateTime.now());
     }
 }
