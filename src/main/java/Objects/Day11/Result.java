@@ -1,4 +1,4 @@
-package Objects;
+package Objects.Day11;
 
 public class Result {
     int totalPower;

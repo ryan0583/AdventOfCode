@@ -1,4 +1,4 @@
-package Objects;
+package Objects.Day10;
 
 public class Star {
     private int xPosition;

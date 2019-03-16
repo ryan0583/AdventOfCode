@@ -1,8 +1,5 @@
-import Objects.GridFrame;
-import Objects.GridToPrint;
+import Objects.Day6.GridFrame;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;

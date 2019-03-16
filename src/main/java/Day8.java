@@ -1,4 +1,4 @@
-import Objects.Node;
+import Objects.Day8.Node;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

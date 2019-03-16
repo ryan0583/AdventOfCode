@@ -1,4 +1,4 @@
-import Objects.Result;
+import Objects.Day11.Result;
 
 import java.util.ArrayList;
 import java.util.List;

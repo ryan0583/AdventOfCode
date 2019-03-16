@@ -1,4 +1,4 @@
-package Objects;
+package Objects.Day7;
 
 public class Worker {
     private Step step;

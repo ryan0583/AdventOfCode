@@ -1,4 +1,4 @@
-package Objects;
+package Objects.Day6;
 
 import javax.swing.*;
 import java.awt.*;

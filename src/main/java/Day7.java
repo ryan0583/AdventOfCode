@@ -1,5 +1,5 @@
-import Objects.Step;
-import Objects.Worker;
+import Objects.Day7.Step;
+import Objects.Day7.Worker;
 
 import java.util.Arrays;
 import java.util.Collection;

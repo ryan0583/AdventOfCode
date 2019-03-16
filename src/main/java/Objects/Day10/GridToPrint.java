@@ -1,4 +1,4 @@
-package Objects;
+package Objects.Day10;
 
 import java.util.Arrays;
 import java.util.List;

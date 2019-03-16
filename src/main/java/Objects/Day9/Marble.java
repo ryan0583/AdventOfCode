@@ -1,4 +1,4 @@
-package Objects;
+package Objects.Day9;
 
 public class Marble {
     private int value;

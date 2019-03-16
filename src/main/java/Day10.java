@@ -1,6 +1,5 @@
-import Objects.GridFrame;
-import Objects.GridToPrint;
-import Objects.Star;
+import Objects.Day10.GridToPrint;
+import Objects.Day10.Star;
 
 import java.util.ArrayList;
 import java.util.Arrays;
