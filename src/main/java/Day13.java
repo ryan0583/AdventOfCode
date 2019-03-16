@@ -34,9 +34,9 @@ public class Day13 {
     }
 
     private static String nextTick(Track track, List<Cart> carts) {
-//        printTrack(track, carts);
+        printTrack(track, carts);
 
-//        System.out.println("TICK!");
+        System.out.println("TICK!");
 
         String firstCollision = null;
 
