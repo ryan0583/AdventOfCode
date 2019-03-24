@@ -13,12 +13,12 @@ public class Day15 {
         GameBoard gameBoard = generateGameBoard();
         List<Combatant> combatants = findCombatants(gameBoard);
 
-//        printGameBoard(gameBoard, combatants);
+        printGameBoard(gameBoard, combatants);
 
         int completedTurns = 0;
 
 //        while (mixedCombatants(combantants)) {
-        while (completedTurns < 10000) {
+        while (completedTurns < 7) {
             System.out.println("----------------------------------");
             Collections.sort(combatants);
             for (Combatant combatant : combatants) {
@@ -38,7 +38,7 @@ public class Day15 {
                 }
             }
 
-//            printGameBoard(gameBoard, combatants);
+            printGameBoard(gameBoard, combatants);
 
             completedTurns++;
             System.out.println(completedTurns);
@@ -102,20 +102,21 @@ public class Day15 {
         //System.out.println("Finding reachable space for " + combatant.getCurrentPosition());
         List<Space> nearestReachableSpaces = new ArrayList<>();
         int fewestSteps = Integer.MAX_VALUE;
+        Space currentSpace = combatant.getCurrentPosition();
         for (Space targetSpace : targetSpaces) {
             //System.out.println("Target space: " + targetSpace);
-            Space currentSpace = combatant.getCurrentPosition();
-            Space shortestRoute = createRoute(currentSpace, targetSpace, gameBoard, occupiedSpaces, new HashSet<>(), null);
-            System.out.println("Found shortest route!");
-            if (shortestRoute != null) {
-                if (currentSpace.isRoutable()) {
-                    int routeSteps = shortestRoute.getRouteSteps();
-                    if (routeSteps < fewestSteps) {
-                        fewestSteps = routeSteps;
-                        nearestReachableSpaces.clear();
-                        nearestReachableSpaces.add(shortestRoute);
-                    } else if (routeSteps == fewestSteps) {
-                        nearestReachableSpaces.add(shortestRoute);
+            if (Math.abs(currentSpace.getxCoord() - targetSpace.getxCoord()) + Math.abs(currentSpace.getyCoord() - targetSpace.getyCoord()) <= fewestSteps) {
+                Space shortestRoute = createRoute(currentSpace, targetSpace, gameBoard, occupiedSpaces, new HashSet<>(), null);
+                if (shortestRoute != null) {
+                    if (currentSpace.isRoutable()) {
+                        int routeSteps = shortestRoute.getRouteSteps();
+                        if (routeSteps < fewestSteps) {
+                            fewestSteps = routeSteps;
+                            nearestReachableSpaces.clear();
+                            nearestReachableSpaces.add(shortestRoute);
+                        } else if (routeSteps == fewestSteps) {
+                            nearestReachableSpaces.add(shortestRoute);
+                        }
                     }
                 }
             }
@@ -164,7 +165,8 @@ public class Day15 {
 //            System.out.println("No Move Available!");
 //        }
 
-        for (Space nextSpace : findDistances(adjacentSpaces, targetSpace).values()) {
+        Collections.sort(adjacentSpaces);
+        for (Space nextSpace : adjacentSpaces) {
             nextSpace.setPreviousSpace(space);
             shortestRoute = createRoute(nextSpace, targetSpace, gameBoard, occupiedSpaces, previousSpaces, shortestRoute);
         }
@@ -179,14 +181,14 @@ public class Day15 {
         return shortestRoute;
     }
 
-    private static SortedMap<Integer, Space> findDistances(List<Space> spaces, Space targetSpace) {
+    private static Collection<Space> sortSpacesByDistance(List<Space> spaces, Space targetSpace) {
         SortedMap<Integer, Space> distanceToSpace = new TreeMap<>();
         for (Space space : spaces) {
             int distance = Math.abs(space.getxCoord() - targetSpace.getxCoord()) + Math.abs(space.getyCoord() - targetSpace.getyCoord());
             distanceToSpace.put(distance, space);
         }
 
-        return distanceToSpace;
+        return distanceToSpace.values();
     }
 
     private static boolean shouldMove(Combatant combatant, List<Space> targetSpaces) {
@@ -198,10 +200,6 @@ public class Day15 {
             }
         }
         return shouldMove;
-    }
-
-    private static void moveCombatant(Combatant combatant, List<Combatant> combatants, GameBoard gameBoard) {
-
     }
 
     private static GameBoard generateGameBoard() {
