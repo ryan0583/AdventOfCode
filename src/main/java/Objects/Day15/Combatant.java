@@ -5,11 +5,24 @@ public class Combatant implements Comparable<Combatant> {
     private Character type;
     private Space currentPosition;
     private int hp = 200;
+
     private int attackPoints = 3;
 
     public Combatant(Character type, Integer[] currentPosition) {
         this.type = type;
-        this.currentPosition = new Space(currentPosition[0], currentPosition[1]);
+        this.currentPosition = new Space(null, currentPosition[0], currentPosition[1]);
+    }
+
+    public boolean isAlive() {
+        return hp > 0;
+    }
+
+    public boolean isDead() {
+        return hp <= 0;
+    }
+
+    public void sufferAttack(int hpReduction) {
+        hp -= hpReduction;
     }
 
     public Character getType() {
@@ -34,6 +47,10 @@ public class Combatant implements Comparable<Combatant> {
 
     public int getAttackPoints() {
         return attackPoints;
+    }
+
+    public void setAttackPoints(int attackPoints) {
+        this.attackPoints = attackPoints;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package Objects.Day15;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -8,10 +9,9 @@ public class Space implements Comparable<Space> {
     private Space previousSpace;
     private Integer xCoord;
     private Integer yCoord;
-    private List<Space> adjacentSpaces;
-    private boolean routable = false;
 
-    public Space(int xCoord, int yCoord) {
+    public Space(Space previousSpace, int xCoord, int yCoord) {
+        this.previousSpace = previousSpace;
         this.xCoord = xCoord;
         this.yCoord = yCoord;
     }
@@ -46,11 +46,11 @@ public class Space implements Comparable<Space> {
         System.out.println(this);
     }
 
-    public int getxCoord() {
+    public Integer getxCoord() {
         return xCoord;
     }
 
-    public void setxCoord(int xCoord) {
+    public void setxCoord(Integer xCoord) {
         this.xCoord = xCoord;
     }
 
@@ -60,14 +60,6 @@ public class Space implements Comparable<Space> {
 
     public void setyCoord(Integer yCoord) {
         this.yCoord = yCoord;
-    }
-
-    public List<Space> getAdjacentSpaces() {
-        return adjacentSpaces;
-    }
-
-    public void setAdjacentSpaces(List<Space> adjacentSpaces) {
-        this.adjacentSpaces = adjacentSpaces;
     }
 
     @Override
@@ -82,14 +74,6 @@ public class Space implements Comparable<Space> {
     @Override
     public int hashCode() {
         return Objects.hash(xCoord, yCoord);
-    }
-
-    public boolean isRoutable() {
-        return routable;
-    }
-
-    public void setRoutable(boolean routable) {
-        this.routable = routable;
     }
 
     @Override
@@ -110,7 +94,24 @@ public class Space implements Comparable<Space> {
 
     @Override
     public int compareTo(Space o) {
-        int lastCmp = yCoord.compareTo(o.getyCoord());
-        return (lastCmp != 0 ? lastCmp : xCoord.compareTo(o.getxCoord()));
+        int lastCmp = doSpaceComparison(this, o);
+
+        if (lastCmp != 0) {
+            return lastCmp;
+        }
+
+        List<Space> thisRoute = this.getRoute(new ArrayList<>());
+        List<Space> otherRoute = o.getRoute(new ArrayList<>());
+
+        if (thisRoute.size() >= 2 && otherRoute.size() >= 2) {
+            return doSpaceComparison(thisRoute.get(1), otherRoute.get(1));
+        }
+
+        return 0;
+    }
+
+    private int doSpaceComparison(Space space1, Space space2) {
+        int lastCmp = space1.getyCoord().compareTo(space2.getyCoord());
+        return (lastCmp != 0 ? lastCmp : space1.getxCoord().compareTo(space2.getxCoord()));
     }
 }

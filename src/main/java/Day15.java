@@ -16,40 +16,209 @@ public class Day15 {
         printGameBoard(gameBoard, combatants);
 
         int completedTurns = 0;
+        boolean done = false;
 
-//        while (mixedCombatants(combantants)) {
-        while (completedTurns < 7) {
-            System.out.println("----------------------------------");
+        while (!done) {
+            System.out.println("-------------------------------------------");
+
             Collections.sort(combatants);
+
             for (Combatant combatant : combatants) {
-                Set<Space> occupiedSpaces = combatants.stream()
+                if (combatant.isDead()) {
+                    continue;
+                }
+
+                List<Combatant> aliveCombatants = combatants
+                        .stream()
+                        .filter(Combatant::isAlive)
+                        .collect(Collectors.toList());
+
+                if (!mixedCombatants(aliveCombatants)) {
+                    done = true;
+                    break;
+                }
+
+                Set<Space> occupiedSpaces = aliveCombatants.stream()
                         .filter(otherCombatant -> !otherCombatant.equals(combatant))
                         .map(Combatant::getCurrentPosition)
                         .collect(Collectors.toSet());
 
-                List<Space> targetSpaces = findTargetSpaces(combatant, combatants, gameBoard, occupiedSpaces);
-                if (shouldMove(combatant, targetSpaces)) {
-                    Space space = findNearestReachableSpace(combatant, targetSpaces, gameBoard, occupiedSpaces);
-                    if (space != null) {
-                        List<Space> route = space.getRoute(new ArrayList<>());
-                        Space nextStep = route.get(1);
-                        combatant.setCurrentPosition(new Space(nextStep.getxCoord(), nextStep.getyCoord()));
-                    }
-                }
+                Set<Space> targetSpaces = findTargetSpaces(combatant, aliveCombatants, gameBoard, occupiedSpaces);
+
+                move(gameBoard, combatant, occupiedSpaces, targetSpaces);
+
+                attack(gameBoard, combatant, aliveCombatants);
             }
+
+            if (!done) {
+                completedTurns++;
+            }
+            System.out.println(completedTurns);
+            printGameBoard(gameBoard, combatants.stream().filter(Combatant::isAlive).collect(Collectors.toList()));
+        }
+
+        Integer totalRemainingHitPoints = combatants
+                .stream()
+                .filter(Combatant::isAlive)
+                .map(Combatant::getHp)
+                .reduce((a, b) -> a + b)
+                .orElse(0);
+
+        System.out.println(completedTurns);
+        System.out.println(totalRemainingHitPoints);
+        System.out.println(completedTurns * totalRemainingHitPoints);
+    }
+
+    public static void partTwo() {
+        int elfAttackPoints = 4;
+
+        while (true) {
+            GameBoard gameBoard = generateGameBoard();
+            List<Combatant> combatants = findCombatants(gameBoard);
+
+            final int currentElfAttackPoints = elfAttackPoints;
+            combatants
+                    .stream()
+                    .filter(combatant -> combatant.getType().equals('E'))
+                    .forEach(combatant -> combatant.setAttackPoints(currentElfAttackPoints));
 
             printGameBoard(gameBoard, combatants);
 
-            completedTurns++;
-            System.out.println(completedTurns);
+            int completedTurns = 0;
+            boolean done = false;
+            while (!done) {
+                System.out.println("-------------------------------------------");
+
+                Collections.sort(combatants);
+
+                for (Combatant combatant : combatants) {
+                    if (combatant.isDead()) {
+                        if (combatant.getType().equals('E')) {
+                            done = true;
+                            break;
+                        }
+                        continue;
+                    }
+
+                    List<Combatant> aliveCombatants = combatants
+                            .stream()
+                            .filter(Combatant::isAlive)
+                            .collect(Collectors.toList());
+
+                    if (!mixedCombatants(aliveCombatants)) {
+                        done = true;
+                        break;
+                    }
+
+                    Set<Space> occupiedSpaces = aliveCombatants.stream()
+                            .filter(otherCombatant -> !otherCombatant.equals(combatant))
+                            .map(Combatant::getCurrentPosition)
+                            .collect(Collectors.toSet());
+
+                    Set<Space> targetSpaces = findTargetSpaces(combatant, aliveCombatants, gameBoard, occupiedSpaces);
+
+                    move(gameBoard, combatant, occupiedSpaces, targetSpaces);
+
+                    attack(gameBoard, combatant, aliveCombatants);
+                }
+
+                if (!done) {
+                    completedTurns++;
+                }
+                System.out.println(completedTurns);
+                printGameBoard(gameBoard, combatants.stream().filter(Combatant::isAlive).collect(Collectors.toList()));
+            }
+
+            if (!mixedCombatants(combatants)) {
+                Integer totalRemainingHitPoints = combatants
+                        .stream()
+                        .filter(Combatant::isAlive)
+                        .map(Combatant::getHp)
+                        .reduce((a, b) -> a + b)
+                        .orElse(0);
+
+                System.out.println(completedTurns);
+                System.out.println(totalRemainingHitPoints);
+                System.out.println(completedTurns * totalRemainingHitPoints);
+                break;
+            } else {
+                System.out.println("ELF DIED, TRYING AGAIN!");
+                elfAttackPoints++;
+            }
         }
     }
 
+    private static void move(GameBoard gameBoard, Combatant combatant, Set<Space> occupiedSpaces, Set<Space> targetSpaces) {
+        if (!targetSpaces.isEmpty()
+                && shouldMove(combatant, targetSpaces)) {
+            Set<Space> visitedSpaces = new HashSet<>();
+            visitedSpaces.add(combatant.getCurrentPosition());
+            Space space = findNearestReachableSpace(Collections.singletonList(combatant.getCurrentPosition()),
+                    visitedSpaces,
+                    targetSpaces,
+                    gameBoard,
+                    occupiedSpaces);
+
+            if (space != null) {
+                List<Space> route = space.getRoute(new ArrayList<>());
+                Space nextStep = route.get(1);
+                combatant.setCurrentPosition(new Space(null, nextStep.getxCoord(), nextStep.getyCoord()));
+            }
+        }
+    }
+
+    private static void attack(GameBoard gameBoard, Combatant combatant, List<Combatant> aliveCombatants) {
+        Combatant combatantToAttack = findTargetCombatant(combatant,
+                gameBoard,
+                aliveCombatants
+                        .stream()
+                        .filter(otherCombantant -> !otherCombantant.getType().equals(combatant.getType()))
+                        .collect(Collectors.toList()));
+        if (combatantToAttack != null) {
+            combatantToAttack.sufferAttack(combatant.getAttackPoints());
+        }
+    }
+
+    private static Combatant findTargetCombatant(Combatant currentCombatant,
+                                                 GameBoard gameBoard,
+                                                 List<Combatant> combatants) {
+        List<Combatant> targetCombatants = new ArrayList<>();
+        int lowHp = Integer.MAX_VALUE;
+
+        Set adjSpaces = findUnoccupiedAdjacentSpaces(currentCombatant.getCurrentPosition(),
+                gameBoard,
+                Collections.EMPTY_SET);
+
+        for (Combatant combatant : combatants) {
+            if (adjSpaces.contains(combatant.getCurrentPosition())) {
+                int hp = combatant.getHp();
+                if (hp <= lowHp) {
+                    if (hp < lowHp) {
+                        targetCombatants.clear();
+                    }
+                    targetCombatants.add(combatant);
+                    lowHp = hp;
+                }
+            }
+        }
+
+        if (targetCombatants.isEmpty()) {
+            return null;
+        }
+        Collections.sort(targetCombatants);
+        return targetCombatants.get(0);
+    }
+
     private static boolean mixedCombatants(List<Combatant> combatants) {
+        List<Combatant> aliveCombatants = combatants
+                .stream()
+                .filter(Combatant::isAlive)
+                .collect(Collectors.toList());
+
         boolean mixedCombatants = false;
         Character foundType = null;
 
-        for (Combatant combatant : combatants) {
+        for (Combatant combatant : aliveCombatants) {
             if (foundType == null) {
                 foundType = combatant.getType();
             } else if (!combatant.getType().equals(foundType)) {
@@ -61,11 +230,11 @@ public class Day15 {
         return mixedCombatants;
     }
 
-    private static List<Space> findTargetSpaces(Combatant combatant,
-                                                List<Combatant> combatants,
-                                                GameBoard gameBoard,
-                                                Set<Space> occupiedSpaces) {
-        List<Space> targetSpaces = new ArrayList<>();
+    private static Set<Space> findTargetSpaces(Combatant combatant,
+                                               List<Combatant> combatants,
+                                               GameBoard gameBoard,
+                                               Set<Space> occupiedSpaces) {
+        Set<Space> targetSpaces = new HashSet<>();
 
         for (Combatant targetCombatant : combatants) {
             if (!combatant.getType().equals(targetCombatant.getType())) {
@@ -77,15 +246,15 @@ public class Day15 {
         return targetSpaces;
     }
 
-    private static List<Space> findUnoccupiedAdjacentSpaces(Space space,
-                                                            GameBoard gameBoard,
-                                                            Set<Space> occupiedSpaces) {
-        List<Space> potentialAdjacentSpaces = new ArrayList<>();
-        potentialAdjacentSpaces.add(new Space(space.getxCoord() - 1, space.getyCoord()));
-        potentialAdjacentSpaces.add(new Space(space.getxCoord() + 1, space.getyCoord()));
-        potentialAdjacentSpaces.add(new Space(space.getxCoord(), space.getyCoord() - 1));
-        potentialAdjacentSpaces.add(new Space(space.getxCoord(), space.getyCoord() + 1));
-        List<Space> adjacentSpaces = new ArrayList<>();
+    private static Set<Space> findUnoccupiedAdjacentSpaces(Space space,
+                                                           GameBoard gameBoard,
+                                                           Set<Space> occupiedSpaces) {
+        Set<Space> potentialAdjacentSpaces = new HashSet<>();
+        potentialAdjacentSpaces.add(new Space(space, space.getxCoord() - 1, space.getyCoord()));
+        potentialAdjacentSpaces.add(new Space(space, space.getxCoord() + 1, space.getyCoord()));
+        potentialAdjacentSpaces.add(new Space(space, space.getxCoord(), space.getyCoord() - 1));
+        potentialAdjacentSpaces.add(new Space(space, space.getxCoord(), space.getyCoord() + 1));
+        Set<Space> adjacentSpaces = new HashSet<>();
         for (Space potentialTargetSpace : potentialAdjacentSpaces) {
             if (!occupiedSpaces.contains(potentialTargetSpace)
                     && gameBoard.getGameBoard()[potentialTargetSpace.getyCoord()][potentialTargetSpace.getxCoord()] == '.') {
@@ -95,103 +264,43 @@ public class Day15 {
         return adjacentSpaces;
     }
 
-    private static Space findNearestReachableSpace(Combatant combatant,
-                                                   List<Space> targetSpaces,
+    private static Space findNearestReachableSpace(List<Space> prevDepthSpaces,
+                                                   Set<Space> visitedSpaces,
+                                                   Set<Space> targetSpaces,
                                                    GameBoard gameBoard,
                                                    Set<Space> occupiedSpaces) {
-        //System.out.println("Finding reachable space for " + combatant.getCurrentPosition());
-        List<Space> nearestReachableSpaces = new ArrayList<>();
-        int fewestSteps = Integer.MAX_VALUE;
-        Space currentSpace = combatant.getCurrentPosition();
-        for (Space targetSpace : targetSpaces) {
-            //System.out.println("Target space: " + targetSpace);
-            if (Math.abs(currentSpace.getxCoord() - targetSpace.getxCoord()) + Math.abs(currentSpace.getyCoord() - targetSpace.getyCoord()) <= fewestSteps) {
-                Space shortestRoute = createRoute(currentSpace, targetSpace, gameBoard, occupiedSpaces, new HashSet<>(), null);
-                if (shortestRoute != null) {
-                    if (currentSpace.isRoutable()) {
-                        int routeSteps = shortestRoute.getRouteSteps();
-                        if (routeSteps < fewestSteps) {
-                            fewestSteps = routeSteps;
-                            nearestReachableSpaces.clear();
-                            nearestReachableSpaces.add(shortestRoute);
-                        } else if (routeSteps == fewestSteps) {
-                            nearestReachableSpaces.add(shortestRoute);
-                        }
-                    }
-                }
+        List<Space> thisDepthSpaces = new ArrayList<>();
+
+        for (Space space : prevDepthSpaces) {
+            thisDepthSpaces.addAll(findUnoccupiedAdjacentSpaces(space, gameBoard, occupiedSpaces)
+                    .stream()
+                    .filter(adjSpace -> !visitedSpaces.contains(adjSpace))
+                    .collect(Collectors.toList()));
+        }
+
+        if (thisDepthSpaces.isEmpty()) {
+            return null;
+        } else {
+            List<Space> reachableTargets = thisDepthSpaces
+                    .stream()
+                    .filter(targetSpaces::contains)
+                    .collect(Collectors.toList());
+
+            if (reachableTargets.isEmpty()) {
+                visitedSpaces.addAll(thisDepthSpaces);
+                return findNearestReachableSpace(thisDepthSpaces,
+                        visitedSpaces,
+                        targetSpaces,
+                        gameBoard,
+                        occupiedSpaces);
+            } else {
+                Collections.sort(reachableTargets);
+                return reachableTargets.get(0);
             }
         }
-
-        Collections.sort(nearestReachableSpaces);
-        if (!nearestReachableSpaces.isEmpty()) {
-            return nearestReachableSpaces.get(0);
-        }
-        return null;
     }
 
-    private static Space createRoute(Space space,
-                                     Space targetSpace,
-                                     GameBoard gameBoard,
-                                     Set<Space> occupiedSpaces,
-                                     Set<Space> previousSpaces,
-                                     Space shortestRoute) {
-//        if (targetSpace.equals(new Space(5, 4))
-//                && space.equals(new Space(5, 3))) {
-//            System.out.println(space);
-//        }
-
-        if (shortestRoute != null
-                && space.getRouteSteps() > shortestRoute.getRouteSteps()) {
-            return shortestRoute;
-        }
-
-        if (space.equals(targetSpace)) {
-            space.setRoutable(true);
-            if (shortestRoute == null
-                    || space.getRouteSteps() < shortestRoute.getRouteSteps()) {
-                shortestRoute = space;
-            }
-            return shortestRoute;
-        }
-
-        previousSpaces.add(space);
-        space.setAdjacentSpaces(findUnoccupiedAdjacentSpaces(space, gameBoard, occupiedSpaces).stream()
-                .filter(spaces -> !previousSpaces.contains(spaces))
-                .collect(Collectors.toList()));
-
-        List<Space> adjacentSpaces = space.getAdjacentSpaces();
-//        if (targetSpace.equals(new Space(5, 4))
-//                && adjacentSpaces.isEmpty()) {
-//            System.out.println("No Move Available!");
-//        }
-
-        Collections.sort(adjacentSpaces);
-        for (Space nextSpace : adjacentSpaces) {
-            nextSpace.setPreviousSpace(space);
-            shortestRoute = createRoute(nextSpace, targetSpace, gameBoard, occupiedSpaces, previousSpaces, shortestRoute);
-        }
-        previousSpaces.remove(space);
-
-        space.setRoutable(!space.getAdjacentSpaces()
-                .stream()
-                .filter(Space::isRoutable)
-                .collect(Collectors.toList())
-                .isEmpty());
-
-        return shortestRoute;
-    }
-
-    private static Collection<Space> sortSpacesByDistance(List<Space> spaces, Space targetSpace) {
-        SortedMap<Integer, Space> distanceToSpace = new TreeMap<>();
-        for (Space space : spaces) {
-            int distance = Math.abs(space.getxCoord() - targetSpace.getxCoord()) + Math.abs(space.getyCoord() - targetSpace.getyCoord());
-            distanceToSpace.put(distance, space);
-        }
-
-        return distanceToSpace.values();
-    }
-
-    private static boolean shouldMove(Combatant combatant, List<Space> targetSpaces) {
+    private static boolean shouldMove(Combatant combatant, Set<Space> targetSpaces) {
         boolean shouldMove = true;
         for (Space targetSpace : targetSpaces) {
             if (targetSpace.equals(combatant.getCurrentPosition())) {
@@ -257,17 +366,18 @@ public class Day15 {
     }
 
     private static void printGameBoard(GameBoard gameBoard, List<Combatant> combatants) {
-        char[][] trackToPrint = new char[gameBoard.getGameBoard().length][gameBoard.getGameBoard()[0].length];
-
-        for (int y = 0; y < gameBoard.getGameBoard().length; y++) {
-            trackToPrint[y] = Arrays.copyOf(gameBoard.getGameBoard()[y], gameBoard.getGameBoard()[y].length);
-        }
-
-        for (Combatant combatant : combatants) {
-            Space position = combatant.getCurrentPosition();
-            trackToPrint[position.getyCoord()][position.getxCoord()] = combatant.getType();
-        }
-
-        System.out.println(Arrays.deepToString(trackToPrint).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
+//        char[][] trackToPrint = new char[gameBoard.getGameBoard().length][gameBoard.getGameBoard()[0].length];
+//
+//        for (int y = 0; y < gameBoard.getGameBoard().length; y++) {
+//            trackToPrint[y] = Arrays.copyOf(gameBoard.getGameBoard()[y], gameBoard.getGameBoard()[y].length);
+//        }
+//
+//        for (Combatant combatant : combatants) {
+//            Space position = combatant.getCurrentPosition();
+//            trackToPrint[position.getyCoord()][position.getxCoord()] = combatant.getType();
+//        }
+//
+//        System.out.println(Arrays.deepToString(trackToPrint).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
+        combatants.forEach(combantant -> System.out.println(combantant.getType() + " - " + combantant.getHp()));
     }
 }
