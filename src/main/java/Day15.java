@@ -366,18 +366,18 @@ public class Day15 {
     }
 
     private static void printGameBoard(GameBoard gameBoard, List<Combatant> combatants) {
-//        char[][] trackToPrint = new char[gameBoard.getGameBoard().length][gameBoard.getGameBoard()[0].length];
-//
-//        for (int y = 0; y < gameBoard.getGameBoard().length; y++) {
-//            trackToPrint[y] = Arrays.copyOf(gameBoard.getGameBoard()[y], gameBoard.getGameBoard()[y].length);
-//        }
-//
-//        for (Combatant combatant : combatants) {
-//            Space position = combatant.getCurrentPosition();
-//            trackToPrint[position.getyCoord()][position.getxCoord()] = combatant.getType();
-//        }
-//
-//        System.out.println(Arrays.deepToString(trackToPrint).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
+        char[][] trackToPrint = new char[gameBoard.getGameBoard().length][gameBoard.getGameBoard()[0].length];
+
+        for (int y = 0; y < gameBoard.getGameBoard().length; y++) {
+            trackToPrint[y] = Arrays.copyOf(gameBoard.getGameBoard()[y], gameBoard.getGameBoard()[y].length);
+        }
+
+        for (Combatant combatant : combatants) {
+            Space position = combatant.getCurrentPosition();
+            trackToPrint[position.getyCoord()][position.getxCoord()] = combatant.getType();
+        }
+
+        System.out.println(Arrays.deepToString(trackToPrint).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
         combatants.forEach(combantant -> System.out.println(combantant.getType() + " - " + combantant.getHp()));
     }
 }
