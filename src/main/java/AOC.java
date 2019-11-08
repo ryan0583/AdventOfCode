@@ -31,6 +31,7 @@ public class AOC {
 //        Day14.partTwo();
 //        Day15.partOne();
 //        Day15.partTwo();
+          Day17.partOne();
         System.out.println(LocalDateTime.now());
     }
 }
