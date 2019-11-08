@@ -4,7 +4,7 @@ public class AOC {
 
     public static void main(String[] args) {
         System.out.println(LocalDateTime.now());
-        Day1.partTwo();
+//        Day1.partTwo();
 //        Day2.partOne();
 //        Day2.partTwo();
 //        Day3.partOne();
