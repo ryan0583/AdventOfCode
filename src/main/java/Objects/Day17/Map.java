@@ -43,58 +43,63 @@ public class Map {
     public char[][] drip(final char[][] map, final Pair<Integer, Integer> coords) {
         Pair<Integer, Integer> nextCoords = doDripping(map, coords);
 
-//        System.out.println(Arrays.deepToString(map).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
-//        System.out.println("\r\n");
-
         if (nextCoords.getValue0() < map[0].length
                 && nextCoords.getValue1() < map.length) {
-
-            final Pair<Integer, Integer> bottomRow = moveUp(nextCoords);
-            Pair<Integer, Integer> top = bottomRow;
-            final Integer leftEdge = findContainerLeftEdge(map, nextCoords);
-            final Integer rightEdge = findContainerRightEdge(map, nextCoords);
-            if (leftEdge != null && rightEdge != null) {
-                top = fill(map, bottomRow, leftEdge, rightEdge);
-            }
-
+            final Pair<Integer, Integer> top = fill(map, nextCoords);
             if (map[moveDown(top).getValue1()][top.getValue0()] == WATER) {
                 map[top.getValue1()][top.getValue0()] = DRIP;
             }
-
-            //System.out.println(Arrays.deepToString(map).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
-            //System.out.println("\r\n");
-            Pair<Integer, Integer> topRight = moveRight(top);
-            while (topRight.getValue0() < map[0].length
-                    && map[topRight.getValue1()][topRight.getValue0()] == DRIP) {
-                topRight = moveRight(topRight);
-            }
-            if (topRight.getValue0() < map[0].length
-                    && topRight.getValue1() > 0
-                    && shouldDripRight(map, topRight)) {
-                drip(map, topRight);
-            }
-            Pair<Integer, Integer> topLeft = moveLeft(top);
-            while (topLeft.getValue0() < map[0].length
-                    && map[topLeft.getValue1()][topLeft.getValue0()] == DRIP) {
-                topLeft = moveLeft(topLeft);
-            }
-            if (topLeft.getValue0() > 0
-                    && topLeft.getValue1() > 0
-                    && shouldDripLeft(map, topLeft)) {
-                drip(map, topLeft);
-            }
+            dripNext(map, top);
         }
 
         return map;
+    }
+
+    private void dripNext(final char[][] map, final Pair<Integer, Integer> coords) {
+        //System.out.println(Arrays.deepToString(map).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
+        //System.out.println("\r\n");
+        dripNextRight(map, coords);
+        dripNextLeft(map, coords);
+
+    }
+
+    private void dripNextRight(final char[][] map, final Pair<Integer, Integer> coords) {
+        Pair<Integer, Integer> topRight = moveRight(coords);
+        while (topRight.getValue0() < map[0].length
+                && map[topRight.getValue1()][topRight.getValue0()] == DRIP) {
+            topRight = moveRight(topRight);
+        }
+        if (topRight.getValue0() < map[0].length
+                && topRight.getValue1() > 0
+                && shouldDripRight(map, topRight)) {
+            //System.out.println("DRIP RIGHT!!");
+            drip(map, topRight);
+        }
+    }
+
+    private void dripNextLeft(final char[][] map, final Pair<Integer, Integer> coords) {
+        Pair<Integer, Integer> topLeft = moveLeft(coords);
+        while (topLeft.getValue0() < map[0].length
+                && map[topLeft.getValue1()][topLeft.getValue0()] == DRIP) {
+            topLeft = moveLeft(topLeft);
+        }
+        if (topLeft.getValue0() > 0
+                && topLeft.getValue1() > 0
+                && shouldDripLeft(map, topLeft)) {
+            //System.out.println("DRIP LEFT!!");
+            drip(map, topLeft);
+        }
     }
 
     private boolean shouldDripRight(final char[][] map, final Pair<Integer, Integer> coords) {
         final Pair<Integer, Integer> left = moveLeft(coords);
         final Pair<Integer, Integer> downAndLeft = moveDown(left);
 
+        final char thisChar = map[coords.getValue1()][coords.getValue0()];
         final char charLeft = map[left.getValue1()][left.getValue0()];
         final char charDownLeft = map[downAndLeft.getValue1()][downAndLeft.getValue0()];
-        return (charLeft == DRIP || charLeft == CLAY) && (
+        return thisChar == SAND &&
+                (charLeft == DRIP || charLeft == CLAY) && (
                 charDownLeft == CLAY
                         || charDownLeft == WATER);
     }
@@ -103,9 +108,11 @@ public class Map {
         final Pair<Integer, Integer> right = moveRight(coords);
         final Pair<Integer, Integer> downAndRight = moveDown(right);
 
+        final char thisChar = map[coords.getValue1()][coords.getValue0()];
         final char charRight = map[right.getValue1()][right.getValue0()];
         final char charDownRight = map[downAndRight.getValue1()][downAndRight.getValue0()];
-        return (charRight == DRIP || charRight == CLAY) && (
+        return thisChar == SAND &&
+                (charRight == DRIP || charRight == CLAY) && (
                 charDownRight == CLAY
                         || charDownRight == WATER);
     }
@@ -123,9 +130,33 @@ public class Map {
 
     public void printCount(final char[][] map) {
         int count = 0;
-        for (int i = 0; i < map.length; i++) {
+        final int minY = findMinY(map);
+        for (int i = minY; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 if (map[i][j] == DRIP || map[i][j] == WATER) {
+                    count++;
+                }
+            }
+        }
+        System.out.println(count);
+    }
+
+    private int findMinY(final char[][] map) {
+        for (int i = 0; i < map.length; i++) {
+            final char[] row = map[i];
+            if (new String(row).contains("" + CLAY)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    public void printCountPart2(final char[][] map) {
+        int count = 0;
+
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                if (map[i][j] == WATER) {
                     count++;
                 }
             }
@@ -149,14 +180,25 @@ public class Map {
         return new Pair<>(coords.getValue0() + 1, coords.getValue1());
     }
 
-    private Pair<Integer, Integer> fill(final char[][] map, final Pair<Integer, Integer> coords, final int min, final int max) {
+    private Pair<Integer, Integer> fill(final char[][] map, final Pair<Integer, Integer> nextCoords) {
+        final Pair<Integer, Integer> bottomRow = moveUp(nextCoords);
+        Pair<Integer, Integer> top = bottomRow;
+        final Integer leftEdge = findContainerLeftEdge(map, nextCoords);
+        final Integer rightEdge = findContainerRightEdge(map, nextCoords);
+        if (leftEdge != null && rightEdge != null) {
+            top = fillRow(map, bottomRow, leftEdge, rightEdge);
+        }
+        return top;
+    }
+
+    private Pair<Integer, Integer> fillRow(final char[][] map, final Pair<Integer, Integer> coords, final int min, final int max) {
         map[coords.getValue1()][coords.getValue0()] = WATER;
         final int newMax = fillRight(map, coords, max);
         final int newMin = fillLeft(map, coords, min);
         final Pair<Integer, Integer> nextCoords = moveUp(coords);
         if (map[nextCoords.getValue1()][max] == CLAY
                 && map[nextCoords.getValue1()][min] == CLAY) {
-            return fill(map, nextCoords, newMin, newMax);
+            return fillRow(map, nextCoords, newMin, newMax);
         }
         return nextCoords;
     }
