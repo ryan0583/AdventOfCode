@@ -20,8 +20,8 @@ public class Map {
     public static final char DRIP = '|';
     public static final char WATER = '~';
 
-
     private FileReader fileReader;
+    private Boolean incrementalDraw;
 
     public char[][] createMap() {
         final List<Clay> clays = getClayPositions();
@@ -40,30 +40,39 @@ public class Map {
         return new String(map[0]).indexOf(SPRING);
     }
 
-    public char[][] drip(final char[][] map, final Pair<Integer, Integer> coords) {
+    public char[][] drip(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
         Pair<Integer, Integer> nextCoords = doDripping(map, coords);
+
+        if (incrementalDraw) {
+            frame.revalidate();
+            frame.repaint();
+        }
 
         if (nextCoords.getValue0() < map[0].length
                 && nextCoords.getValue1() < map.length) {
             final Pair<Integer, Integer> top = fill(map, nextCoords);
+            if (incrementalDraw) {
+                frame.revalidate();
+                frame.repaint();
+            }
             if (map[moveDown(top).getValue1()][top.getValue0()] == WATER) {
                 map[top.getValue1()][top.getValue0()] = DRIP;
             }
-            dripNext(map, top);
+            dripNext(map, top, frame);
         }
 
         return map;
     }
 
-    private void dripNext(final char[][] map, final Pair<Integer, Integer> coords) {
+    private void dripNext(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
         //System.out.println(Arrays.deepToString(map).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
         //System.out.println("\r\n");
-        dripNextRight(map, coords);
-        dripNextLeft(map, coords);
+        dripNextRight(map, coords, frame);
+        dripNextLeft(map, coords, frame);
 
     }
 
-    private void dripNextRight(final char[][] map, final Pair<Integer, Integer> coords) {
+    private void dripNextRight(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
         Pair<Integer, Integer> topRight = moveRight(coords);
         while (topRight.getValue0() < map[0].length
                 && map[topRight.getValue1()][topRight.getValue0()] == DRIP) {
@@ -73,11 +82,11 @@ public class Map {
                 && topRight.getValue1() > 0
                 && shouldDripRight(map, topRight)) {
             //System.out.println("DRIP RIGHT!!");
-            drip(map, topRight);
+            drip(map, topRight, frame);
         }
     }
 
-    private void dripNextLeft(final char[][] map, final Pair<Integer, Integer> coords) {
+    private void dripNextLeft(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
         Pair<Integer, Integer> topLeft = moveLeft(coords);
         while (topLeft.getValue0() < map[0].length
                 && map[topLeft.getValue1()][topLeft.getValue0()] == DRIP) {
@@ -87,7 +96,7 @@ public class Map {
                 && topLeft.getValue1() > 0
                 && shouldDripLeft(map, topLeft)) {
             //System.out.println("DRIP LEFT!!");
-            drip(map, topLeft);
+            drip(map, topLeft, frame);
         }
     }
 
