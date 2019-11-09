@@ -14,11 +14,11 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class Map {
 
-    private static final char SAND = '.';
-    private static final char CLAY = '#';
-    private static final char SPRING = '+';
-    private static final char DRIP = '|';
-    private static final char WATER = '~';
+    public static final char SAND = '.';
+    public static final char CLAY = '#';
+    public static final char SPRING = '+';
+    public static final char DRIP = '|';
+    public static final char WATER = '~';
 
 
     private FileReader fileReader;
