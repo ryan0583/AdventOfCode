@@ -40,21 +40,15 @@ public class Map {
         return new String(map[0]).indexOf(SPRING);
     }
 
-    public char[][] drip(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
+    public char[][] drip(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) throws InterruptedException {
         Pair<Integer, Integer> nextCoords = doDripping(map, coords);
 
-        if (incrementalDraw) {
-            frame.revalidate();
-            frame.repaint();
-        }
+        draw(frame);
 
         if (nextCoords.getValue0() < map[0].length
                 && nextCoords.getValue1() < map.length) {
             final Pair<Integer, Integer> top = fill(map, nextCoords);
-            if (incrementalDraw) {
-                frame.revalidate();
-                frame.repaint();
-            }
+            draw(frame);
             if (map[moveDown(top).getValue1()][top.getValue0()] == WATER) {
                 map[top.getValue1()][top.getValue0()] = DRIP;
             }
@@ -64,7 +58,26 @@ public class Map {
         return map;
     }
 
-    private void dripNext(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
+    private Pair<Integer, Integer> doDripping(final char[][] map, final Pair<Integer, Integer> coords) {
+        Pair<Integer, Integer> nextCoords = coords;
+        while (nextCoords.getValue0() < map[0].length
+                && nextCoords.getValue1() < map.length
+                && map[nextCoords.getValue1()][nextCoords.getValue0()] == SAND) {
+            map[nextCoords.getValue1()][nextCoords.getValue0()] = DRIP;
+            nextCoords = moveDown(nextCoords);
+        }
+        return nextCoords;
+    }
+
+    private void draw(final GridFrame frame) throws InterruptedException {
+        if (incrementalDraw) {
+            frame.revalidate();
+            frame.repaint();
+            Thread.sleep(100);
+        }
+    }
+
+    private void dripNext(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) throws InterruptedException {
         //System.out.println(Arrays.deepToString(map).replace("], ", "]\n").replace("[", "").replace("]", "").replace(", ", " "));
         //System.out.println("\r\n");
         dripNextRight(map, coords, frame);
@@ -72,7 +85,7 @@ public class Map {
 
     }
 
-    private void dripNextRight(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
+    private void dripNextRight(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) throws InterruptedException {
         Pair<Integer, Integer> topRight = moveRight(coords);
         while (topRight.getValue0() < map[0].length
                 && map[topRight.getValue1()][topRight.getValue0()] == DRIP) {
@@ -86,7 +99,7 @@ public class Map {
         }
     }
 
-    private void dripNextLeft(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) {
+    private void dripNextLeft(final char[][] map, final Pair<Integer, Integer> coords, final GridFrame frame) throws InterruptedException {
         Pair<Integer, Integer> topLeft = moveLeft(coords);
         while (topLeft.getValue0() < map[0].length
                 && map[topLeft.getValue1()][topLeft.getValue0()] == DRIP) {
@@ -124,17 +137,6 @@ public class Map {
                 (charRight == DRIP || charRight == CLAY) && (
                 charDownRight == CLAY
                         || charDownRight == WATER);
-    }
-
-    private Pair<Integer, Integer> doDripping(final char[][] map, final Pair<Integer, Integer> coords) {
-        Pair<Integer, Integer> nextCoords = coords;
-        while (nextCoords.getValue0() < map[0].length
-                && nextCoords.getValue1() < map.length
-                && map[nextCoords.getValue1()][nextCoords.getValue0()] == SAND) {
-            map[nextCoords.getValue1()][nextCoords.getValue0()] = DRIP;
-            nextCoords = moveDown(nextCoords);
-        }
-        return nextCoords;
     }
 
     public void printCount(final char[][] map) {
