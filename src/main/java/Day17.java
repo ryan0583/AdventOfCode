@@ -3,11 +3,9 @@ import Objects.Day17.Map;
 import Utils.FileReader;
 import org.javatuples.Pair;
 
-import java.util.Arrays;
-
 public class Day17 {
     public static void partOne() {
-        final Map map = new Map(new FileReader("src/main/resources/Day17Input.txt"), false);
+        final Map map = new Map(new FileReader("src/main/resources/Day17Input.txt"), true);
         map.printCount(process(map));
     }
 
@@ -25,8 +23,7 @@ public class Day17 {
             frame.revalidate();
             frame.repaint();
             return completedMap;
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             System.out.println(e.getMessage());
         }
         return null;
